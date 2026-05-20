@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modelo interactivo · DD Transporte</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f0f3f7;
+    margin: 0;
+    padding: 16px;
+    color: #1a1a1a;
+  }
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    padding: 28px;
+  }
+  h1 { color: #1f3864; margin: 0 0 4px; font-size: 22px; }
+  .subtitle { color: #666; margin-bottom: 24px; font-size: 13px; }
+
+  .controls {
+    background: #f6f8fa;
+    border: 1px solid #d0d7de;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 700px) { .controls { grid-template-columns: 1fr; } }
+
+  .control {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .control label {
+    font-weight: 600;
+    color: #1f3864;
+    font-size: 14px;
+  }
+  .control .row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .control input[type="range"] {
+    flex: 1;
+    accent-color: #1f3864;
+  }
+  .control input[type="number"] {
+    width: 70px;
+    padding: 6px 10px;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    color: #1f3864;
+  }
+  .control .meta {
+    font-size: 12px;
+    color: #888;
+  }
+
+  .presets {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .preset-btn {
+    background: white;
+    border: 1px solid #d0d7de;
+    padding: 6px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.15s;
+  }
+  .preset-btn:hover { background: #f6f8fa; }
+  .preset-btn.active {
+    background: #1f3864;
+    color: white;
+    border-color: #1f3864;
+  }
+
+  .results {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 700px) { .results { grid-template-columns: 1fr 1fr; } }
+
+  .result-card {
+    background: #f6f8fa;
+    border-left: 4px solid #1f3864;
+    padding: 14px;
+    border-radius: 6px;
+  }
+  .result-card.highlight { border-left-color: #27ae60; background: #f0f9f4; }
+  .result-card.negative { border-left-color: #e74c3c; background: #fdf3f2; }
+  .result-card .label {
+    font-size: 11px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .result-card .value {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1f3864;
+  }
+  .result-card.negative .value { color: #e74c3c; }
+  .result-card.highlight .value { color: #27ae60; }
+  .result-card .sub {
+    font-size: 11px;
+    color: #888;
+    margin-top: 2px;
+  }
+
+  .chart-container {
+    position: relative;
+    height: 320px;
+    margin-bottom: 24px;
+  }
+
+  details {
+    background: #f6f8fa;
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+  }
+  details summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: #1f3864;
+    font-size: 14px;
+  }
+  details[open] summary { margin-bottom: 12px; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th, td {
+    text-align: left;
+    padding: 6px 8px;
+    border-bottom: 1px solid #e1e4e8;
+  }
+  th { background: #1f3864; color: white; font-weight: 600; }
+  td:last-child, th:last-child { text-align: right; }
+  tr.subtotal td { background: #f0f3f7; font-weight: 600; }
+
+  .footer {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #e1e4e8;
+    color: #888;
+    font-size: 11px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚛 Modelo interactivo · DD Transporte</h1>
+    <p class="subtitle">Ajustá los sliders para ver cómo cambia el resultado · Valores a precios abr-2026 · Tarifa $52.606/M³</p>
+
+    <div class="controls">
+      <div class="control">
+        <label>Cantidad de camiones</label>
+        <div class="row">
+          <input type="range" id="camSlider" min="8" max="18" step="1" value="10">
+          <input type="number" id="camInput" min="8" max="18" step="1" value="10">
+        </div>
+        <div class="meta" id="camMeta">10 camiones · 11 choferes + 6 admin = 17 empleados</div>
+      </div>
+
+      <div class="control">
+        <label>Viajes biocomb por camión por mes</label>
+        <div class="row">
+          <input type="range" id="viajeSlider" min="6" max="15" step="0.1" value="8">
+          <input type="number" id="viajeInput" min="6" max="15" step="0.1" value="8">
+        </div>
+        <div class="meta" id="viajeMeta">8,0 viajes/cam/mes · 80 viajes/mes totales · 960 viajes/año</div>
+      </div>
+    </div>
+
+    <div class="presets">
+      <span style="font-size:12px;color:#666;align-self:center;margin-right:4px">Presets:</span>
+      <button class="preset-btn" data-cam="10" data-viaje="8">BASE (10×8)</button>
+      <button class="preset-btn" data-cam="13" data-viaje="8">Conservador (13×8)</button>
+      <button class="preset-btn" data-cam="10" data-viaje="11.8">Productivo (10×11,8)</button>
+      <button class="preset-btn" data-cam="13" data-viaje="10">Normal (13×10)</button>
+      <button class="preset-btn" data-cam="13" data-viaje="12">Optimista (13×12)</button>
+    </div>
+
+    <div class="results">
+      <div class="result-card">
+        <div class="label">Ventas anuales</div>
+        <div class="value" id="ventasOut">—</div>
+        <div class="sub" id="ventasSub">—</div>
+      </div>
+      <div class="result-card">
+        <div class="label">Antes Impuestos</div>
+        <div class="value" id="antesOut">—</div>
+        <div class="sub" id="antesSub">—</div>
+      </div>
+      <div class="result-card" id="netoCard">
+        <div class="label">Resultado Neto</div>
+        <div class="value" id="netoOut">—</div>
+        <div class="sub" id="netoSub">—</div>
+      </div>
+      <div class="result-card" id="margenCard">
+        <div class="label">Margen Neto</div>
+        <div class="value" id="margenOut">—</div>
+        <div class="sub">sobre ventas</div>
+      </div>
+    </div>
+
+    <div class="chart-container">
+      <canvas id="chart"></canvas>
+    </div>
+
+    <details>
+      <summary>Ver detalle de costos por categoría</summary>
+      <table>
+        <thead>
+          <tr><th>Concepto</th><th>Driver</th><th>Importe anual</th></tr>
+        </thead>
+        <tbody id="detalleTbody"></tbody>
+      </table>
+    </details>
+
+    <details>
+      <summary>Ver parámetros y supuestos del modelo</summary>
+      <table>
+        <tbody>
+          <tr><td>M³ por viaje (carga útil bitren)</td><td>43,17</td></tr>
+          <tr><td>Tarifa $/M³ promedio (mix 60% Bioetanol + 40% Biodiesel)</td><td>$52.606</td></tr>
+          <tr><td>KM por viaje a refinería (ida sola, promedio mix abr-26)</td><td>596</td></tr>
+          <tr><td>Factor inflación feb-26 → abr-26</td><td>1,0688</td></tr>
+          <tr><td>Amortización flota existente (anual)</td><td>-$469M</td></tr>
+          <tr><td>Amortización camión nuevo (USD 200k × $1.400 / 8 años)</td><td>-$35M / camión</td></tr>
+          <tr><td>Ajustes no recurrentes (Ruiz + Energía + IVA)</td><td>+$101M</td></tr>
+          <tr><td>Impuesto a las Ganancias</td><td>25% / 30% / 35% (escala progresiva)</td></tr>
+        </tbody>
+      </table>
+    </details>
+
+    <div class="footer">
+      Modelo interactivo · DD Transporte · Generado <span id="fecha"></span> · Asistente Personal
+    </div>
+  </div>
+
+<script>
+// === CONSTANTES DEL MODELO ===
+const M3_VIAJE = 43.17;
+const PRECIO_M3 = 52606;
+const KM_VIAJE = 596;
+const KM_2025 = 861120;
+const VENTAS_2025 = 2690877689.59;
+const INFLACION = 1.0688;
+const AMORT_BASE = -469104625.41;
+const AMORT_POR_CAM_NUEVO = -35000000;  // 3 cam × USD 200k × $1.400 / 8 años / 3 = $35M por camión adicional
+const AJUSTES = 100984456.81;
+
+// Costos base 2025 (de '02-2026'!J), sin inflactar — pesos a feb-26
+const COSTOS = {
+  sueldos: -786287651.28,
+  combustible: -599830805,
+  cubiertas: -103877864,
+  reparacion: -116411334,
+  peajes: -21910391,
+  fletes: -778197,
+  ib_lh: -50836308,
+  impuestos_tasas: -42355187,
+  gastos_bancarios: -3528492,
+  imp_automotor: -13070461,
+  seguros: -16136954,
+  habilitaciones: -21333628,
+  ropa: -3919239,
+  medicos: -3978908,
+  control_fito: -12123265,
+  honorarios: -8903759,
+  libreria: -3797348,
+  administracion: -12674338,
+  varios: -67860318,
+  limpieza: -3057953,
+  energia: -14324593,
+  intereses_perdidos: -89317123
+};
+
+function calcular(cam, viaje) {
+  // Plantilla
+  // BASE: 10 cam → 11 chof + 6 admin
+  // Cada cam adicional sobre 10 agrega 4/3 choferes (3 cam → 4 chof)
+  let choferes, admin;
+  if (cam <= 10) {
+    choferes = 11;
+    admin = 6;
+  } else {
+    choferes = 11 + (cam - 10) * (4 / 3);
+    admin = 6;
+  }
+  const total_empleados = choferes + admin;
+
+  // Ratios
+  const sueldos_pond_base = 11 * 1.5 + 6;  // = 22.5
+  const sueldos_pond_esc = choferes * 1.5 + admin;
+  const ratio_plantilla = sueldos_pond_esc / sueldos_pond_base;
+
+  const ratio_cam = cam / 10;
+  const ratio_emp = total_empleados / 17;
+
+  // Volúmenes
+  const viajes_mes = cam * viaje;
+  const viajes_anu = viajes_mes * 12;
+  const m3_mes = viajes_mes * M3_VIAJE;
+  const km_anu = viajes_anu * KM_VIAJE;
+  const ratio_km = km_anu / KM_2025;
+
+  // Ventas
+  const ventas_mes = m3_mes * PRECIO_M3;
+  const ventas_anu = ventas_mes * 12;
+  const ratio_v = ventas_anu / VENTAS_2025;
+
+  // Costos (todos × inflación, menos amort y ajustes)
+  const sueldos = COSTOS.sueldos * ratio_plantilla * INFLACION;
+  // KM-dep
+  const combustible = COSTOS.combustible * ratio_km * INFLACION;
+  const cubiertas = COSTOS.cubiertas * ratio_km * INFLACION;
+  const reparacion = COSTOS.reparacion * ratio_km * INFLACION;
+  const peajes = COSTOS.peajes * ratio_km * INFLACION;
+  const fletes = COSTOS.fletes * ratio_km * INFLACION;
+  // Ventas-dep
+  const ib_lh = COSTOS.ib_lh * ratio_v * INFLACION;
+  const impuestos_tasas = COSTOS.impuestos_tasas * ratio_v * INFLACION;
+  const gastos_bancarios = COSTOS.gastos_bancarios * ratio_v * INFLACION;
+  // Por camión
+  const imp_automotor = COSTOS.imp_automotor * ratio_cam * INFLACION;
+  const seguros = COSTOS.seguros * ratio_cam * INFLACION;
+  const habilitaciones = COSTOS.habilitaciones * ratio_cam * INFLACION;
+  // Por empleado
+  const ropa = COSTOS.ropa * ratio_emp * INFLACION;
+  const medicos = COSTOS.medicos * ratio_emp * INFLACION;
+  // Fijos puros (Control Fito es ventas-dep)
+  const control_fito = COSTOS.control_fito * ratio_v * INFLACION;
+  const honorarios = COSTOS.honorarios * INFLACION;
+  const libreria = COSTOS.libreria * INFLACION;
+  const administracion = COSTOS.administracion * INFLACION;
+  const varios = COSTOS.varios * INFLACION;
+  const limpieza = COSTOS.limpieza * INFLACION;
+  const energia = COSTOS.energia * INFLACION;
+  const intereses_perdidos = COSTOS.intereses_perdidos * INFLACION;
+
+  // Amortización
+  const amort_existente = AMORT_BASE;
+  const amort_nueva = cam > 10 ? AMORT_POR_CAM_NUEVO * (cam - 10) : 0;
+  const amort_total = amort_existente + amort_nueva;
+
+  const subt_km_dep = combustible + cubiertas + reparacion + peajes + fletes;
+  const subt_ventas_dep = ib_lh + impuestos_tasas + gastos_bancarios;
+  const subt_cam = imp_automotor + seguros + habilitaciones;
+  const subt_emp = ropa + medicos;
+  const subt_fijos = control_fito + honorarios + libreria + administracion + varios + limpieza + energia + intereses_perdidos;
+
+  const total_gastos = sueldos + subt_km_dep + subt_ventas_dep + subt_cam + subt_emp + subt_fijos + amort_total + AJUSTES;
+  const antes_imp = ventas_anu + total_gastos;
+
+  // Impuesto progresivo
+  let impuesto = 0;
+  if (antes_imp > 0) {
+    if (antes_imp <= 133514185.74) {
+      impuesto = -antes_imp * 0.25;
+    } else if (antes_imp <= 1335141857.38) {
+      impuesto = -33378546.43 - (antes_imp - 133514185.74) * 0.30;
+    } else {
+      impuesto = -393866847.93 - (antes_imp - 1335141857.38) * 0.35;
+    }
+  }
+
+  const neto = antes_imp + impuesto;
+  const margen = ventas_anu > 0 ? neto / ventas_anu : 0;
+
+  return {
+    cam, viaje, choferes, admin, total_empleados,
+    viajes_mes, viajes_anu, ventas_anu,
+    sueldos, subt_km_dep, subt_ventas_dep, subt_cam, subt_emp, subt_fijos,
+    combustible, cubiertas, reparacion, peajes, fletes,
+    ib_lh, impuestos_tasas, gastos_bancarios,
+    imp_automotor, seguros, habilitaciones,
+    ropa, medicos, control_fito, honorarios, libreria, administracion, varios, limpieza, energia, intereses_perdidos,
+    amort_total, amort_existente, amort_nueva,
+    total_gastos, antes_imp, impuesto, neto, margen,
+    ratio_km, ratio_v, ratio_plantilla, ratio_cam, ratio_emp
+  };
+}
+
+function fmt(v) {
+  const abs = Math.abs(v);
+  if (abs >= 1e9) return (v/1e9).toFixed(2) + ' B';
+  if (abs >= 1e6) return (v/1e6).toFixed(1) + ' M';
+  if (abs >= 1e3) return (v/1e3).toFixed(0) + ' k';
+  return v.toFixed(0);
+}
+function fmtPesos(v) {
+  return '$' + fmt(v);
+}
+function fmtPct(v) {
+  return (v*100).toFixed(2) + '%';
+}
+
+let chart;
+function renderChart(r) {
+  const ctx = document.getElementById('chart').getContext('2d');
+  if (chart) chart.destroy();
+  chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Ventas', 'Sueldos', 'KM-dep', 'Ventas-dep', 'Por Cam', 'Por Empl', 'Fijos', 'Amort', 'Ajustes', 'Antes Imp', 'Neto'],
+      datasets: [{
+        data: [r.ventas_anu, r.sueldos, r.subt_km_dep, r.subt_ventas_dep, r.subt_cam, r.subt_emp, r.subt_fijos, r.amort_total, AJUSTES, r.antes_imp, r.neto],
+        backgroundColor: [
+          '#3498db', '#e67e22', '#e67e22', '#e67e22', '#e67e22', '#e67e22', '#e67e22', '#e67e22', '#16a085',
+          '#9b59b6',
+          r.neto >= 0 ? '#27ae60' : '#e74c3c'
+        ],
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        title: {
+          display: true,
+          text: 'Cascada de resultados ($M)',
+          font: { size: 14, weight: 'bold' },
+          color: '#1f3864'
+        },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              return '  ' + fmtPesos(ctx.parsed.y);
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          ticks: {
+            callback: v => '$' + (v/1e6).toFixed(0) + 'M'
+          }
+        }
+      }
+    }
+  });
+}
+
+function renderTabla(r) {
+  const filas = [
+    ['Sueldos', `plantilla ${r.ratio_plantilla.toFixed(3)}×`, r.sueldos],
+    ['SUBTOTAL Var Op KM-dep', `KM ${r.ratio_km.toFixed(3)}×`, r.subt_km_dep, true],
+    ['  Combustible', '', r.combustible],
+    ['  Cubiertas y Lubricantes', '', r.cubiertas],
+    ['  Reparación y Mantenim.', '', r.reparacion],
+    ['  Peajes', '', r.peajes],
+    ['  Fletes', '', r.fletes],
+    ['SUBTOTAL Var Op Ventas-dep', `Ventas ${r.ratio_v.toFixed(3)}×`, r.subt_ventas_dep, true],
+    ['  IB y LH', '', r.ib_lh],
+    ['  Impuestos y tasas', '', r.impuestos_tasas],
+    ['  Gastos bancarios', '', r.gastos_bancarios],
+    ['SUBTOTAL Por Camión', `Cam ${r.ratio_cam.toFixed(2)}×`, r.subt_cam, true],
+    ['  Impuesto Automotor', '', r.imp_automotor],
+    ['  Seguros', '', r.seguros],
+    ['  Habilitaciones', '', r.habilitaciones],
+    ['SUBTOTAL Por Empleado', `Empl ${r.ratio_emp.toFixed(3)}×`, r.subt_emp, true],
+    ['  Ropa', '', r.ropa],
+    ['  Médicos', '', r.medicos],
+    ['SUBTOTAL Fijos Puros', '', r.subt_fijos, true],
+    ['  Control Fitosanitario', '', r.control_fito],
+    ['  Honorarios', '', r.honorarios],
+    ['  Librería', '', r.libreria],
+    ['  Administración', '', r.administracion],
+    ['  Varios', '', r.varios],
+    ['  Limpieza', '', r.limpieza],
+    ['  Energía', '', r.energia],
+    ['  Intereses Perdidos', '', r.intereses_perdidos],
+    ['SUBTOTAL Amortización', 'no inflactada', r.amort_total, true],
+    ['  Existente (Bs uso)', '', r.amort_existente],
+    ['  Nuevos camiones', `${Math.max(0, r.cam-10)} cam adicionales`, r.amort_nueva],
+    ['SUBTOTAL Ajustes', 'no inflactados', AJUSTES, true],
+    ['TOTAL GASTOS', '', r.total_gastos, true]
+  ];
+  let html = '';
+  filas.forEach(f => {
+    const cls = f[3] ? ' class="subtotal"' : '';
+    html += `<tr${cls}><td>${f[0]}</td><td><span style="color:#888;font-size:11px">${f[1]}</span></td><td>${fmtPesos(f[2])}</td></tr>`;
+  });
+  document.getElementById('detalleTbody').innerHTML = html;
+}
+
+function render() {
+  const cam = parseInt(document.getElementById('camInput').value);
+  const viaje = parseFloat(document.getElementById('viajeInput').value);
+
+  const r = calcular(cam, viaje);
+
+  // Meta
+  document.getElementById('camMeta').textContent =
+    `${cam} camiones · ${r.choferes.toFixed(cam > 10 ? 1 : 0)} choferes + ${r.admin} admin = ${r.total_empleados.toFixed(cam > 10 ? 1 : 0)} empleados`;
+  document.getElementById('viajeMeta').textContent =
+    `${viaje.toFixed(1)} viajes/cam/mes · ${r.viajes_mes.toFixed(0)} viajes/mes totales · ${r.viajes_anu.toFixed(0)} viajes/año`;
+
+  // Cards
+  document.getElementById('ventasOut').textContent = fmtPesos(r.ventas_anu);
+  document.getElementById('ventasSub').textContent = (r.ventas_anu/1e6).toFixed(0) + 'M anuales';
+  document.getElementById('antesOut').textContent = fmtPesos(r.antes_imp);
+  document.getElementById('antesSub').textContent = 'imp: ' + fmtPesos(r.impuesto);
+  document.getElementById('netoOut').textContent = fmtPesos(r.neto);
+  document.getElementById('netoSub').textContent = 'margen ' + fmtPct(r.margen);
+  document.getElementById('margenOut').textContent = fmtPct(r.margen);
+
+  // Color del card neto
+  document.getElementById('netoCard').className = 'result-card ' + (r.neto >= 0 ? 'highlight' : 'negative');
+  document.getElementById('margenCard').className = 'result-card ' + (r.margen >= 0 ? 'highlight' : 'negative');
+
+  // Presets
+  document.querySelectorAll('.preset-btn').forEach(b => {
+    const pc = parseInt(b.dataset.cam);
+    const pv = parseFloat(b.dataset.viaje);
+    b.classList.toggle('active', pc === cam && Math.abs(pv - viaje) < 0.01);
+  });
+
+  renderChart(r);
+  renderTabla(r);
+}
+
+// Sync sliders ↔ inputs
+['cam', 'viaje'].forEach(name => {
+  const slider = document.getElementById(name + 'Slider');
+  const input = document.getElementById(name + 'Input');
+  slider.addEventListener('input', () => { input.value = slider.value; render(); });
+  input.addEventListener('input', () => { slider.value = input.value; render(); });
+});
+
+// Presets
+document.querySelectorAll('.preset-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('camSlider').value = btn.dataset.cam;
+    document.getElementById('camInput').value = btn.dataset.cam;
+    document.getElementById('viajeSlider').value = btn.dataset.viaje;
+    document.getElementById('viajeInput').value = btn.dataset.viaje;
+    render();
+  });
+});
+
+document.getElementById('fecha').textContent = new Date().toLocaleDateString('es-AR');
+render();
+</script>
+</body>
+</html>
