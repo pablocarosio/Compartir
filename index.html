@@ -52,7 +52,7 @@
 </head>
 <body>
 <h1>Panel de control · cartera de cheques</h1>
-<div class="sub">Snapshot al Mié 27/05/2026 · tenencia = En Cartera + Depositado · fuente Gestión de Valores · generado 27/5/2026, 02:32:06</div>
+<div class="sub">Snapshot al Mié 27/05/2026 · tenencia = En Cartera + Depositado · fuente Gestión de Valores · generado 27/5/2026, 02:32:50</div>
 
 <div class="filter-bar">
   <label for="periodo">Período:</label>
@@ -176,11 +176,13 @@ function applyFilter(periodKey) {
   const ticketProm = totalChq > 0 ? totalMonto / totalChq : 0;
   const promedioSaldo = diasFil.reduce((s, d) => s + d.saldo, 0) / diasFil.length;
   // Monto de cheques recibidos por día hábil en promedio.
-  // Usamos el factor estándar de 252 días hábiles/año (ya descuenta fines de
-  // semana + feriados de forma promediada). Aproximado, no día por día.
-  const DIAS_HABILES_ANIO = 252;
-  const diasHabilesEstim = diasFil.length * (DIAS_HABILES_ANIO / 365);
-  const montoDiarioProm = diasHabilesEstim > 0 ? totalMonto / diasHabilesEstim : 0;
+  // Cuenta los días del período excluyendo sábados y domingos (no descuenta
+  // feriados — Pablo aclaró que no hace falta exactitud en eso).
+  const diasHabiles = diasFil.filter((d) => {
+    const dow = toDate(d.fecha).getUTCDay();
+    return dow !== 0 && dow !== 6;
+  }).length;
+  const montoDiarioProm = diasHabiles > 0 ? totalMonto / diasHabiles : 0;
 
   document.getElementById('kpis').innerHTML = `
     <div class="kpi"><span class="v">$ ${fmt0(saldoHoy)}</span><span class="l">tenencia HOY</span></div>
