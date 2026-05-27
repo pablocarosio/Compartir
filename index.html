@@ -52,7 +52,7 @@
 </head>
 <body>
 <h1>Panel de control · cartera de cheques</h1>
-<div class="sub">Snapshot al Mié 27/05/2026 · tenencia = En Cartera + Depositado · fuente Gestión de Valores · generado 27/5/2026, 02:32:50</div>
+<div class="sub">Snapshot al Mié 27/05/2026 · tenencia = En Cartera + Depositado · fuente Gestión de Valores · generado 27/5/2026, 02:43:09</div>
 
 <div class="filter-bar">
   <label for="periodo">Período:</label>
@@ -100,7 +100,7 @@
 <div class="note">
   <b>Tenencia</b>: cheques en estado En Cartera + Depositado. Resto: salidos en su Fecha Cambio Estado.<br>
   <b>Cliente</b>: extraído de Observaciones. "(sin cliente identificado)" agrupa cheques antiguos / op cambio.<br>
-  <b>Ranking y ticket promedio</b>: cheques cuyo fIngreso cae dentro del período.<br>
+  <b>Ranking y cheque promedio</b>: cheques cuyo fIngreso cae dentro del período.<br>
   <b>Edad de un cheque</b> = Fecha Pago − Fecha Ingreso (plazo intrínseco del cheque, fijo desde la recepción). <b>Edad mediana del día</b>: mediana de los plazos de los cheques vivos ese día — resiste outliers. <b>Edad ponderada por $</b>: pondera por monto. Cheques sin Fecha Pago se excluyen del cálculo de edad.<br>
   <b>KPIs y series de evolución</b>: la tenencia se calcula sobre TODOS los cheques históricos; el período acota el rango mostrado en el eje X.
 </div>
@@ -194,7 +194,7 @@ function applyFilter(periodKey) {
     <div class="kpi" style="border-left-color:${crecimientoAbs >= 0 ? '#2e7d32' : '#b00020'}"><span class="v ${crecimientoAbs >= 0 ? 'pos' : 'neg'}">${crecimientoAbs >= 0 ? '+' : ''}$ ${fmt0(crecimientoAbs)}</span><span class="l">crecimiento período${crecimientoPct !== null ? ' (' + (crecimientoPct >= 0 ? '+' : '') + crecimientoPct.toFixed(1) + '%)' : ''}</span></div>
     <div class="kpi" style="border-left-color:#888"><span class="v">${totalChq}</span><span class="l">cheques recibidos en el período</span></div>
     <div class="kpi" style="border-left-color:#888"><span class="v">$ ${fmt0(totalMonto)}</span><span class="l">monto recibido en el período</span></div>
-    <div class="kpi" style="border-left-color:#0288d1"><span class="v">$ ${fmt0(ticketProm)}</span><span class="l">ticket promedio del período</span></div>
+    <div class="kpi" style="border-left-color:#0288d1"><span class="v">$ ${fmt0(ticketProm)}</span><span class="l">cheque promedio del período</span></div>
     <div class="kpi" style="border-left-color:#0288d1"><span class="v">$ ${fmt0(montoDiarioProm)}</span><span class="l">$ cheques promedio / día hábil</span></div>
     <div class="kpi" style="border-left-color:#888"><span class="v">$ ${fmt0(promedioSaldo)}</span><span class="l">tenencia promedio diaria</span></div>
   `;
@@ -283,7 +283,7 @@ function applyFilter(periodKey) {
     data: {
       labels: ticketLabels,
       datasets: [
-        { label: 'Ticket promedio ($)', data: ticketData, backgroundColor: 'rgba(2,136,209,0.6)', borderColor: '#0288d1', borderWidth: 1, yAxisID: 'y' },
+        { label: 'Cheque promedio ($)', data: ticketData, backgroundColor: 'rgba(2,136,209,0.6)', borderColor: '#0288d1', borderWidth: 1, yAxisID: 'y' },
         { label: 'Cheques recibidos (#)', data: qtyMesData, type: 'line', borderColor: '#f59e0b', borderWidth: 2, fill: false, pointRadius: 3, yAxisID: 'y2', tension: 0.1 },
       ],
     },
@@ -294,14 +294,14 @@ function applyFilter(periodKey) {
         tooltip: {
           callbacks: {
             label: (ctx) => ctx.dataset.yAxisID === 'y'
-              ? 'Ticket prom.: $ ' + ctx.parsed.y.toLocaleString('es-AR')
+              ? 'Cheque prom.: $ ' + ctx.parsed.y.toLocaleString('es-AR')
               : 'Recibidos: ' + ctx.parsed.y + ' cheq.',
           },
         },
       },
       scales: {
         x: { grid: { display: false } },
-        y: { position: 'left', beginAtZero: true, title: { display: true, text: 'Ticket promedio ($)' }, ticks: { callback: (v) => '$ ' + (v / 1_000_000).toFixed(1) + ' M' } },
+        y: { position: 'left', beginAtZero: true, title: { display: true, text: 'Cheque promedio ($)' }, ticks: { callback: (v) => '$ ' + (v / 1_000_000).toFixed(1) + ' M' } },
         y2: { position: 'right', beginAtZero: true, title: { display: true, text: 'Cheques (#)' }, grid: { drawOnChartArea: false } },
       },
     },
@@ -320,7 +320,7 @@ function applyFilter(periodKey) {
   const totalMontoRk = ranking.reduce((s, r) => s + r.monto, 0);
   document.getElementById('rankingBox').innerHTML = `
     <table>
-      <tr><th>#</th><th>Cliente</th><th>Cheques</th><th>Monto total</th><th>Cheq. en cartera HOY</th><th>Monto en cartera HOY</th><th>Ticket prom.</th><th>% del total</th></tr>
+      <tr><th>#</th><th>Cliente</th><th>Cheques</th><th>Monto total</th><th>Cheq. en cartera HOY</th><th>Monto en cartera HOY</th><th>Cheque prom.</th><th>% del total</th></tr>
       ${ranking.map((r, i) => `<tr>
         <td class="num">${i + 1}</td>
         <td>${r.cliente}</td>
