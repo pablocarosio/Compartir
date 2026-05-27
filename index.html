@@ -52,7 +52,7 @@
 </head>
 <body>
 <h1>Panel de control · cartera de cheques</h1>
-<div class="sub">Snapshot al Mié 27/05/2026 · tenencia = En Cartera + Depositado · fuente Gestión de Valores · generado 27/5/2026, 02:26:58</div>
+<div class="sub">Snapshot al Mié 27/05/2026 · tenencia = En Cartera + Depositado · fuente Gestión de Valores · generado 27/5/2026, 02:32:06</div>
 
 <div class="filter-bar">
   <label for="periodo">Período:</label>
@@ -175,8 +175,12 @@ function applyFilter(periodKey) {
   const totalMonto = chequesPeriodo.reduce((s, c) => s + c.monto, 0);
   const ticketProm = totalChq > 0 ? totalMonto / totalChq : 0;
   const promedioSaldo = diasFil.reduce((s, d) => s + d.saldo, 0) / diasFil.length;
-  // Monto de cheques recibidos por día en promedio (flujo de recepción)
-  const montoDiarioProm = diasFil.length > 0 ? totalMonto / diasFil.length : 0;
+  // Monto de cheques recibidos por día hábil en promedio.
+  // Usamos el factor estándar de 252 días hábiles/año (ya descuenta fines de
+  // semana + feriados de forma promediada). Aproximado, no día por día.
+  const DIAS_HABILES_ANIO = 252;
+  const diasHabilesEstim = diasFil.length * (DIAS_HABILES_ANIO / 365);
+  const montoDiarioProm = diasHabilesEstim > 0 ? totalMonto / diasHabilesEstim : 0;
 
   document.getElementById('kpis').innerHTML = `
     <div class="kpi"><span class="v">$ ${fmt0(saldoHoy)}</span><span class="l">tenencia HOY</span></div>
@@ -189,7 +193,7 @@ function applyFilter(periodKey) {
     <div class="kpi" style="border-left-color:#888"><span class="v">${totalChq}</span><span class="l">cheques recibidos en el período</span></div>
     <div class="kpi" style="border-left-color:#888"><span class="v">$ ${fmt0(totalMonto)}</span><span class="l">monto recibido en el período</span></div>
     <div class="kpi" style="border-left-color:#0288d1"><span class="v">$ ${fmt0(ticketProm)}</span><span class="l">ticket promedio del período</span></div>
-    <div class="kpi" style="border-left-color:#0288d1"><span class="v">$ ${fmt0(montoDiarioProm)}</span><span class="l">$ cheques promedio diario</span></div>
+    <div class="kpi" style="border-left-color:#0288d1"><span class="v">$ ${fmt0(montoDiarioProm)}</span><span class="l">$ cheques promedio / día hábil</span></div>
     <div class="kpi" style="border-left-color:#888"><span class="v">$ ${fmt0(promedioSaldo)}</span><span class="l">tenencia promedio diaria</span></div>
   `;
 
