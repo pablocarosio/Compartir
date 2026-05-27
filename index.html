@@ -52,7 +52,7 @@
 </head>
 <body>
 <h1>Panel de control · cartera de cheques</h1>
-<div class="sub">Snapshot al Mié 27/05/2026 · tenencia = En Cartera + Depositado · fuente Gestión de Valores · generado 27/5/2026, 03:09:46</div>
+<div class="sub">Snapshot al Mié 27/05/2026 · tenencia = En Cartera + Depositado · fuente Gestión de Valores · generado 27/5/2026, 03:10:52</div>
 
 <div class="filter-bar">
   <label for="periodo">Período:</label>
@@ -346,9 +346,9 @@ function applyFilter(periodKey) {
   const viernes = diasFil.filter((d) => toDate(d.fecha).getUTCDay() === 5);
   document.getElementById('hitosSemanales').innerHTML = `
     <table>
-      <tr><th>Fecha</th><th>Cheq.</th><th>Clientes</th><th>Tenencia</th><th>Edad mediana</th></tr>
-      ${viernes.map((v) => `<tr><td>${fmtFecha(v.fecha)}</td><td class="num">${v.qty}</td><td class="num">${v.qtyClientes}</td><td class="num">$ ${fmt0(v.saldo)}</td><td class="num">${v.diasMediana.toFixed(1)} d</td></tr>`).join('')}
-      <tr class="total"><td>HOY ${fmtFecha(HOY)}</td><td class="num">${qtyHoy}</td><td class="num">${qtyClientesHoy}</td><td class="num">$ ${fmt0(saldoHoy)}</td><td class="num">${diasMedianaHoy.toFixed(1)} d</td></tr>
+      <tr><th>Fecha</th><th>Cheq.</th><th>Clientes</th><th>Tenencia</th><th>Edad mediana</th><th>Edad pond. $</th></tr>
+      ${viernes.map((v) => `<tr><td>${fmtFecha(v.fecha)}</td><td class="num">${v.qty}</td><td class="num">${v.qtyClientes}</td><td class="num">$ ${fmt0(v.saldo)}</td><td class="num">${v.diasMediana.toFixed(1)} d</td><td class="num">${v.diasPondProm.toFixed(1)} d</td></tr>`).join('')}
+      <tr class="total"><td>HOY ${fmtFecha(HOY)}</td><td class="num">${qtyHoy}</td><td class="num">${qtyClientesHoy}</td><td class="num">$ ${fmt0(saldoHoy)}</td><td class="num">${diasMedianaHoy.toFixed(1)} d</td><td class="num">${diasPondHoy.toFixed(1)} d</td></tr>
     </table>
   `;
 
@@ -360,8 +360,8 @@ function applyFilter(periodKey) {
   const finMesArr = [...finMesPorMes.values()].sort((a, b) => a.fecha.localeCompare(b.fecha));
   document.getElementById('hitosMensuales').innerHTML = `
     <table>
-      <tr><th>Fin de mes</th><th>Cheq.</th><th>Clientes</th><th>Tenencia</th><th>Edad mediana</th></tr>
-      ${finMesArr.map((m) => `<tr><td>${fmtFecha(m.fecha)}</td><td class="num">${m.qty}</td><td class="num">${m.qtyClientes}</td><td class="num">$ ${fmt0(m.saldo)}</td><td class="num">${m.diasMediana.toFixed(1)} d</td></tr>`).join('')}
+      <tr><th>Fin de mes</th><th>Cheq.</th><th>Clientes</th><th>Tenencia</th><th>Edad mediana</th><th>Edad pond. $</th></tr>
+      ${finMesArr.map((m) => `<tr><td>${fmtFecha(m.fecha)}</td><td class="num">${m.qty}</td><td class="num">${m.qtyClientes}</td><td class="num">$ ${fmt0(m.saldo)}</td><td class="num">${m.diasMediana.toFixed(1)} d</td><td class="num">${m.diasPondProm.toFixed(1)} d</td></tr>`).join('')}
     </table>
   `;
 }
