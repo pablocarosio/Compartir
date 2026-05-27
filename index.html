@@ -52,7 +52,7 @@
 </head>
 <body>
 <h1>Panel de control · cartera de cheques</h1>
-<div class="sub">Snapshot al Mié 27/05/2026 · tenencia = En Cartera + Depositado · fuente Gestión de Valores · generado 27/5/2026, 03:10:52</div>
+<div class="sub">Snapshot al Mié 27/05/2026 · tenencia = En Cartera + Depositado · fuente Gestión de Valores · generado 27/5/2026, 03:15:21</div>
 
 <div class="filter-bar">
   <label for="periodo">Período:</label>
@@ -192,11 +192,11 @@ function applyFilter(periodKey) {
     <div class="kpi" style="border-left-color:#9c27b0"><span class="v">${diasPondHoy.toFixed(1)} d</span><span class="l">edad ponderada $</span></div>
     <div class="kpi" style="border-left-color:#888"><span class="v">$ ${fmt0(saldoInicio)}</span><span class="l">tenencia al inicio período</span></div>
     <div class="kpi" style="border-left-color:${crecimientoAbs >= 0 ? '#2e7d32' : '#b00020'}"><span class="v ${crecimientoAbs >= 0 ? 'pos' : 'neg'}">${crecimientoAbs >= 0 ? '+' : ''}$ ${fmt0(crecimientoAbs)}</span><span class="l">crecimiento período${crecimientoPct !== null ? ' (' + (crecimientoPct >= 0 ? '+' : '') + crecimientoPct.toFixed(1) + '%)' : ''}</span></div>
+    <div class="kpi" style="border-left-color:#888"><span class="v">$ ${fmt0(promedioSaldo)}</span><span class="l">tenencia promedio diaria</span></div>
     <div class="kpi" style="border-left-color:#0288d1"><span class="v">${diasHabiles > 0 ? (totalChq / diasHabiles).toFixed(1) : '0'}</span><span class="l">cheques recibidos / día hábil</span></div>
+    <div class="kpi" style="border-left-color:#0288d1"><span class="v">$ ${fmt0(montoDiarioProm)}</span><span class="l">$ cheque promedio / día hábil</span></div>
     <div class="kpi" style="border-left-color:#888"><span class="v">$ ${fmt0(totalMonto)}</span><span class="l">monto recibido en el período</span></div>
     <div class="kpi" style="border-left-color:#0288d1"><span class="v">$ ${fmt0(ticketProm)}</span><span class="l">cheque promedio del período</span></div>
-    <div class="kpi" style="border-left-color:#0288d1"><span class="v">$ ${fmt0(montoDiarioProm)}</span><span class="l">$ cheques promedio / día hábil</span></div>
-    <div class="kpi" style="border-left-color:#888"><span class="v">$ ${fmt0(promedioSaldo)}</span><span class="l">tenencia promedio diaria</span></div>
   `;
 
   document.getElementById('rangeInfo').textContent = 'Rango: ' + fmtFecha(start) + ' → ' + fmtFecha(HOY) + ' · ' + diasFil.length + ' días';
