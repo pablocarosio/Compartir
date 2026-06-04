@@ -27,13 +27,14 @@
   .card .v{font-size:22px;font-weight:700;margin-top:4px}
   .card.chq{border-top:3px solid var(--chq)}
   .card.pres{border-top:3px solid var(--pres)}
-  .tablebox{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:auto}
-  table{border-collapse:collapse;width:100%;min-width:920px;font-variant-numeric:tabular-nums}
+  .tablebox{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:auto;max-height:72vh}
+  table{border-collapse:separate;border-spacing:0;width:100%;min-width:920px;font-variant-numeric:tabular-nums}
   th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
-  thead th{background:var(--head);font-size:12px;color:var(--total);position:sticky;top:0}
-  thead tr.grp th{font-size:12px;text-transform:uppercase;letter-spacing:.03em}
-  th.dia,td.dia{text-align:left;position:sticky;left:0;background:#fff;font-weight:600}
-  thead th.dia{background:var(--head)}
+  thead th{font-size:12px;color:var(--total);position:sticky;background:var(--head)}
+  thead tr.grp th{top:0;z-index:4;font-size:12px;text-transform:uppercase;letter-spacing:.03em}
+  thead tr.sub th{top:33px;z-index:3}
+  th.dia,td.dia{text-align:left;position:sticky;left:0;background:#fff;font-weight:600;z-index:1}
+  thead th.dia{background:var(--head);top:0;z-index:5}
   .g-chq{background:#ecfeff}
   .g-pres{background:#eff6ff}
   tbody tr:hover td{background:#f8fafc}
@@ -41,6 +42,7 @@
   tr.total td{font-weight:700;border-top:2px solid var(--total);background:#f8fafc}
   tr.total td.dia{background:#f1f5f9}
   td.zero{color:#cbd5e1}
+  .sep{border-left:2px solid #94a3b8}
   .muted{color:var(--muted)}
   .foot{margin-top:14px;color:var(--muted);font-size:12px;line-height:1.5}
   @media(max-width:600px){ .card .v{font-size:18px} }
@@ -63,20 +65,20 @@
       <thead>
         <tr class="grp">
           <th class="dia" rowspan="2">Día</th>
-          <th class="g-chq" colspan="3">Descuento de cheques</th>
-          <th class="g-pres" colspan="2">Personales</th>
-          <th class="g-pres" colspan="2">UDA</th>
-          <th class="g-pres" colspan="2">SITRAVIAP</th>
-          <th class="g-pres" colspan="2">Judiciales</th>
-          <th colspan="2">Total préstamos</th>
+          <th class="g-chq sep" colspan="3">Descuento de cheques</th>
+          <th class="g-pres sep" colspan="2">Personales</th>
+          <th class="g-pres sep" colspan="2">UDA</th>
+          <th class="g-pres sep" colspan="2">SITRAVIAP</th>
+          <th class="g-pres sep" colspan="2">Judiciales</th>
+          <th class="sep" colspan="2">Total préstamos</th>
         </tr>
-        <tr>
-          <th class="g-chq">Oper.</th><th class="g-chq">Cheques</th><th class="g-chq">Monto</th>
-          <th class="g-pres">Cant.</th><th class="g-pres">Monto</th>
-          <th class="g-pres">Cant.</th><th class="g-pres">Monto</th>
-          <th class="g-pres">Cant.</th><th class="g-pres">Monto</th>
-          <th class="g-pres">Cant.</th><th class="g-pres">Monto</th>
-          <th>Cant.</th><th>Monto</th>
+        <tr class="sub">
+          <th class="g-chq sep">Oper.</th><th class="g-chq">Cheques</th><th class="g-chq">Monto</th>
+          <th class="g-pres sep">Cant.</th><th class="g-pres">Monto</th>
+          <th class="g-pres sep">Cant.</th><th class="g-pres">Monto</th>
+          <th class="g-pres sep">Cant.</th><th class="g-pres">Monto</th>
+          <th class="g-pres sep">Cant.</th><th class="g-pres">Monto</th>
+          <th class="sep">Cant.</th><th>Monto</th>
         </tr>
       </thead>
       <tbody id="tbody"></tbody>
@@ -85,7 +87,7 @@
   <p class="foot">
     Cheques = informe Operaciones de Cambio de Valores (operaciones liquidadas; se excluyen las que están en estado CARGA).
     Préstamos = Subdiario, capital otorgado por día. Una operación de cheques puede incluir varios cheques.<br>
-    Generado: 4/6/26, 8:03 p. m.
+    Generado: 4/6/26, 8:35 p. m.
   </p>
 </div>
 <script>
@@ -119,9 +121,9 @@ function render(mes){
     const label = String(dnum).padStart(2,'0')+'/'+String(m).padStart(2,'0')+
       ' <span class="muted">'+['dom','lun','mar','mié','jue','vie','sáb'][dow]+'</span>';
     rows += '<tr><td class="dia">'+label+'</td>'+
-      '<td>'+cnt(ch.operaciones)+'</td><td>'+cnt(ch.cheques)+'</td><td>'+money(ch.monto)+'</td>'+
-      CATS.map(c=>'<td>'+cnt(pc[c].cantidad)+'</td><td>'+money(pc[c].monto)+'</td>').join('')+
-      '<td>'+cnt(pr.cantidad)+'</td><td>'+money(pr.monto)+'</td></tr>';
+      '<td class="sep">'+cnt(ch.operaciones)+'</td><td>'+cnt(ch.cheques)+'</td><td>'+money(ch.monto)+'</td>'+
+      CATS.map(c=>'<td class="sep">'+cnt(pc[c].cantidad)+'</td><td>'+money(pc[c].monto)+'</td>').join('')+
+      '<td class="sep">'+cnt(pr.cantidad)+'</td><td>'+money(pr.monto)+'</td></tr>';
     // acumular
     tot.cheques.operaciones+=ch.operaciones; tot.cheques.cheques+=ch.cheques; tot.cheques.monto+=ch.monto;
     tot.prestamos.cantidad+=pr.cantidad; tot.prestamos.monto+=pr.monto;
@@ -129,9 +131,9 @@ function render(mes){
   }
   const tch=tot.cheques, tpr=tot.prestamos, tpc=tpr.porCat;
   rows += '<tr class="total"><td class="dia">TOTAL</td>'+
-    '<td>'+cnt(tch.operaciones)+'</td><td>'+cnt(tch.cheques)+'</td><td>'+money(tch.monto)+'</td>'+
-    CATS.map(c=>'<td>'+cnt(tpc[c].cantidad)+'</td><td>'+money(tpc[c].monto)+'</td>').join('')+
-    '<td>'+cnt(tpr.cantidad)+'</td><td>'+money(tpr.monto)+'</td></tr>';
+    '<td class="sep">'+cnt(tch.operaciones)+'</td><td>'+cnt(tch.cheques)+'</td><td>'+money(tch.monto)+'</td>'+
+    CATS.map(c=>'<td class="sep">'+cnt(tpc[c].cantidad)+'</td><td>'+money(tpc[c].monto)+'</td>').join('')+
+    '<td class="sep">'+cnt(tpr.cantidad)+'</td><td>'+money(tpr.monto)+'</td></tr>';
   document.getElementById('tbody').innerHTML = rows;
 
   document.getElementById('cards').innerHTML =
