@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tablero diario — Credicar</title>
+<style>
+  :root{
+    --bg:#0f172a; --card:#ffffff; --ink:#0f172a; --muted:#64748b;
+    --line:#e2e8f0; --accent:#0d9488; --accent2:#1d4ed8; --head:#f1f5f9;
+    --chq:#0f766e; --pres:#1e40af; --total:#334155;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    background:#f8fafc;color:var(--ink);font-size:14px}
+  header{background:var(--bg);color:#fff;padding:18px 20px}
+  header h1{margin:0;font-size:20px;font-weight:700}
+  header p{margin:4px 0 0;color:#94a3b8;font-size:13px}
+  .wrap{max-width:1200px;margin:0 auto;padding:18px 16px 60px}
+  .controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:18px 0}
+  .controls label{font-weight:600;color:var(--muted)}
+  select{font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:#fff}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;
+    box-shadow:0 1px 2px rgba(0,0,0,.04)}
+  .card .k{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .card .v{font-size:22px;font-weight:700;margin-top:4px}
+  .card.chq{border-top:3px solid var(--chq)}
+  .card.pres{border-top:3px solid var(--pres)}
+  .tablebox{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:auto}
+  table{border-collapse:collapse;width:100%;min-width:920px;font-variant-numeric:tabular-nums}
+  th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+  thead th{background:var(--head);font-size:12px;color:var(--total);position:sticky;top:0}
+  thead tr.grp th{font-size:12px;text-transform:uppercase;letter-spacing:.03em}
+  th.dia,td.dia{text-align:left;position:sticky;left:0;background:#fff;font-weight:600}
+  thead th.dia{background:var(--head)}
+  .g-chq{background:#ecfeff}
+  .g-pres{background:#eff6ff}
+  tbody tr:hover td{background:#f8fafc}
+  tbody tr:hover td.dia{background:#f1f5f9}
+  tr.total td{font-weight:700;border-top:2px solid var(--total);background:#f8fafc}
+  tr.total td.dia{background:#f1f5f9}
+  td.zero{color:#cbd5e1}
+  .muted{color:var(--muted)}
+  .foot{margin-top:14px;color:var(--muted);font-size:12px;line-height:1.5}
+  @media(max-width:600px){ .card .v{font-size:18px} }
+</style>
+</head>
+<body>
+<header>
+  <h1>Tablero diario — Credicar</h1>
+  <p>Descuento de cheques y préstamos otorgados, por día. Datos de Tyche.</p>
+</header>
+<div class="wrap">
+  <div class="controls">
+    <label for="mes">Período:</label>
+    <select id="mes"></select>
+    <span class="muted" id="cobertura"></span>
+  </div>
+  <div class="cards" id="cards"></div>
+  <div class="tablebox">
+    <table>
+      <thead>
+        <tr class="grp">
+          <th class="dia" rowspan="2">Día</th>
+          <th class="g-chq" colspan="3">Descuento de cheques</th>
+          <th class="g-pres" colspan="2">Personales</th>
+          <th class="g-pres" colspan="2">UDA</th>
+          <th class="g-pres" colspan="2">SITRAVIAP</th>
+          <th class="g-pres" colspan="2">Judiciales</th>
+          <th colspan="2">Total préstamos</th>
+        </tr>
+        <tr>
+          <th class="g-chq">Oper.</th><th class="g-chq">Cheques</th><th class="g-chq">Monto</th>
+          <th class="g-pres">Cant.</th><th class="g-pres">Monto</th>
+          <th class="g-pres">Cant.</th><th class="g-pres">Monto</th>
+          <th class="g-pres">Cant.</th><th class="g-pres">Monto</th>
+          <th class="g-pres">Cant.</th><th class="g-pres">Monto</th>
+          <th>Cant.</th><th>Monto</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+  <p class="foot">
+    Cheques = informe Operaciones de Cambio de Valores (operaciones liquidadas; se excluyen las que están en estado CARGA).
+    Préstamos = Subdiario, capital otorgado por día. Una operación de cheques puede incluir varios cheques.<br>
+    Generado: 4/6/26, 7:58 p. m.
+  </p>
+</div>
+<script>
+const DATA = {"2026-05-02":{"cheques":{"operaciones":0,"cheques":0,"monto":0},"prestamos":{"cantidad":1,"monto":500000,"porCat":{"PERSONALES":{"cantidad":0,"monto":0},"UDA":{"cantidad":0,"monto":0},"SITRAVIAP":{"cantidad":1,"monto":500000},"JUDICIALES":{"cantidad":0,"monto":0}}}},"2026-05-04":{"cheques":{"operaciones":3,"cheques":3,"monto":11844360},"prestamos":{"cantidad":11,"monto":2630000,"porCat":{"PERSONALES":{"cantidad":0,"monto":0},"UDA":{"cantidad":9,"monto":1780000},"SITRAVIAP":{"cantidad":1,"monto":150000},"JUDICIALES":{"cantidad":1,"monto":700000}}}},"2026-05-05":{"cheques":{"operaciones":5,"cheques":9,"monto":46179219.39},"prestamos":{"cantidad":16,"monto":3740000,"porCat":{"PERSONALES":{"cantidad":1,"monto":500000},"UDA":{"cantidad":15,"monto":3240000},"SITRAVIAP":{"cantidad":0,"monto":0},"JUDICIALES":{"cantidad":0,"monto":0}}}},"2026-05-06":{"cheques":{"operaciones":0,"cheques":0,"monto":0},"prestamos":{"cantidad":9,"monto":1400000,"porCat":{"PERSONALES":{"cantidad":0,"monto":0},"UDA":{"cantidad":9,"monto":1400000},"SITRAVIAP":{"cantidad":0,"monto":0},"JUDICIALES":{"cantidad":0,"monto":0}}}},"2026-05-07":{"cheques":{"operaciones":0,"cheques":0,"monto":0},"prestamos":{"cantidad":18,"monto":2730000,"porCat":{"PERSONALES":{"cantidad":0,"monto":0},"UDA":{"cantidad":17,"monto":2530000},"SITRAVIAP":{"cantidad":0,"monto":0},"JUDICIALES":{"cantidad":1,"monto":200000}}}},"2026-05-08":{"cheques":{"operaciones":4,"cheques":8,"monto":27403843.03},"prestamos":{"cantidad":22,"monto":4530000,"porCat":{"PERSONALES":{"cantidad":0,"monto":0},"UDA":{"cantidad":21,"monto":4130000},"SITRAVIAP":{"cantidad":1,"monto":400000},"JUDICIALES":{"cantidad":0,"monto":0}}}},"2026-05-09":{"cheques":{"operaciones":1,"cheques":1,"monto":3666300},"prestamos":{"cantidad":2,"monto":200000,"porCat":{"PERSONALES":{"cantidad":0,"monto":0},"UDA":{"cantidad":2,"monto":200000},"SITRAVIAP":{"cantidad":0,"monto":0},"JUDICIALES":{"cantidad":0,"monto":0}}}},"2026-05-11":{"cheques":{"operaciones":2,"cheques":2,"monto":6648868},"prestamos":{"cantidad":18,"monto":4440000,"porCat":{"PERSONALES":{"cantidad":2,"monto":1700000},"UDA":{"cantidad":16,"monto":2740000},"SITRAVIAP":{"cantidad":0,"monto":0},"JUDICIALES":{"cantidad":0,"monto":0}}}},"2026-05-12":{"cheques":{"operaciones":0,"cheques":0,"monto":0},"prestamos":{"cantidad":15,"monto":3550000,"porCat":{"PERSONALES":{"cantidad":0,"monto":0},"UDA":{"cantidad":15,"monto":3550000},"SITRAVIAP":{"cantidad":0,"monto":0},"JUDICIALES":{"cantidad":0,"monto":0}}}},"2026-05-13":{"cheques":{"operaciones":5,"cheques":9,"monto":39650293.4},"prestamos":{"cantidad":16,"monto":4005800,"porCat":{"PERSONALES":{"cantidad":1,"monto":800000},"UDA":{"cantidad":13,"monto":2620000},"SITRAVIAP":{"cantidad":1,"monto":50000},"JUDICIALES":{"cantidad":1,"monto":535800}}}},"2026-05-14":{"cheques":{"operaciones":2,"cheques":3,"monto":20930732},"prestamos":{"cantidad":16,"monto":3800000,"porCat":{"PERSONALES":{"cantidad":1,"monto":300000},"UDA":{"cantidad":14,"monto":3000000},"SITRAVIAP":{"cantidad":1,"monto":500000},"JUDICIALES":{"cantidad":0,"monto":0}}}},"2026-05-15":{"cheques":{"operaciones":3,"cheques":4,"monto":28229620},"prestamos":{"cantidad":12,"monto":2450000,"porCat":{"PERSONALES":{"cantidad":1,"monto":400000},"UDA":{"cantidad":11,"monto":2050000},"SITRAVIAP":{"cantidad":0,"monto":0},"JUDICIALES":{"cantidad":0,"monto":0}}}},"2026-05-18":{"cheques":{"operaciones":2,"cheques":2,"monto":1726000},"prestamos":{"cantidad":11,"monto":2070000,"porCat":{"PERSONALES":{"cantidad":0,"monto":0},"UDA":{"cantidad":11,"monto":2070000},"SITRAVIAP":{"cantidad":0,"monto":0},"JUDICIALES":{"cantidad":0,"monto":0}}}},"2026-05-19":{"cheques":{"operaciones":0,"cheques":0,"monto":0},"prestamos":{"cantidad":25,"monto":6060000,"porCat":{"PERSONALES":{"cantidad":1,"monto":1500000},"UDA":{"cantidad":24,"monto":4560000},"SITRAVIAP":{"cantidad":0,"monto":0},"JUDICIALES":{"cantidad":0,"monto":0}}}},"2026-05-20":{"cheques":{"operaciones":0,"cheques":0,"monto":0},"prestamos":{"cantidad":12,"monto":2790000,"porCat":{"PERSONALES":{"cantidad":0,"monto":0},"UDA":{"cantidad":10,"monto":2340000},"SITRAVIAP":{"cantidad":1,"monto":200000},"JUDICIALES":{"cantidad":1,"monto":250000}}}},"2026-05-21":{"cheques":{"operaciones":0,"cheques":0,"monto":0},"prestamos":{"cantidad":11,"monto":2700000,"porCat":{"PERSONALES":{"cantidad":1,"monto":500000},"UDA":{"cantidad":6,"monto":1700000},"SITRAVIAP":{"cantidad":4,"monto":500000},"JUDICIALES":{"cantidad":0,"monto":0}}}},"2026-05-22":{"cheques":{"operaciones":0,"cheques":0,"monto":0},"prestamos":{"cantidad":9,"monto":2700000,"porCat":{"PERSONALES":{"cantidad":1,"monto":1000000},"UDA":{"cantidad":8,"monto":1700000},"SITRAVIAP":{"cantidad":0,"monto":0},"JUDICIALES":{"cantidad":0,"monto":0}}}},"2026-05-26":{"cheques":{"operaciones":0,"cheques":0,"monto":0},"prestamos":{"cantidad":4,"monto":850000,"porCat":{"PERSONALES":{"cantidad":0,"monto":0},"UDA":{"cantidad":3,"monto":700000},"SITRAVIAP":{"cantidad":0,"monto":0},"JUDICIALES":{"cantidad":1,"monto":150000}}}},"2026-05-27":{"cheques":{"operaciones":0,"cheques":0,"monto":0},"prestamos":{"cantidad":4,"monto":1100000,"porCat":{"PERSONALES":{"cantidad":0,"monto":0},"UDA":{"cantidad":3,"monto":600000},"SITRAVIAP":{"cantidad":1,"monto":500000},"JUDICIALES":{"cantidad":0,"monto":0}}}},"2026-05-28":{"cheques":{"operaciones":0,"cheques":0,"monto":0},"prestamos":{"cantidad":3,"monto":360000,"porCat":{"PERSONALES":{"cantidad":0,"monto":0},"UDA":{"cantidad":3,"monto":360000},"SITRAVIAP":{"cantidad":0,"monto":0},"JUDICIALES":{"cantidad":0,"monto":0}}}},"2026-05-29":{"cheques":{"operaciones":0,"cheques":0,"monto":0},"prestamos":{"cantidad":1,"monto":250000,"porCat":{"PERSONALES":{"cantidad":0,"monto":0},"UDA":{"cantidad":1,"monto":250000},"SITRAVIAP":{"cantidad":0,"monto":0},"JUDICIALES":{"cantidad":0,"monto":0}}}},"2026-06-01":{"cheques":{"operaciones":1,"cheques":2,"monto":7576953.38},"prestamos":{"cantidad":3,"monto":700000,"porCat":{"PERSONALES":{"cantidad":0,"monto":0},"UDA":{"cantidad":3,"monto":700000},"SITRAVIAP":{"cantidad":0,"monto":0},"JUDICIALES":{"cantidad":0,"monto":0}}}},"2026-06-02":{"cheques":{"operaciones":4,"cheques":7,"monto":17957885},"prestamos":{"cantidad":7,"monto":2920000,"porCat":{"PERSONALES":{"cantidad":0,"monto":0},"UDA":{"cantidad":7,"monto":2920000},"SITRAVIAP":{"cantidad":0,"monto":0},"JUDICIALES":{"cantidad":0,"monto":0}}}},"2026-06-03":{"cheques":{"operaciones":2,"cheques":4,"monto":20350000},"prestamos":{"cantidad":1,"monto":400000,"porCat":{"PERSONALES":{"cantidad":0,"monto":0},"UDA":{"cantidad":1,"monto":400000},"SITRAVIAP":{"cantidad":0,"monto":0},"JUDICIALES":{"cantidad":0,"monto":0}}}}};
+const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const CATS = ['PERSONALES','UDA','SITRAVIAP','JUDICIALES'];
+const fmt = new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0});
+const fmtN = new Intl.NumberFormat('es-AR');
+const money = v => v ? fmt.format(Math.round(v)) : '<span class="zero">—</span>';
+const cnt = v => v ? fmtN.format(v) : '<span class="zero">—</span>';
+
+function months(){
+  const set = new Set(Object.keys(DATA).map(d=>d.slice(0,7)));
+  return [...set].sort().reverse();
+}
+function emptyDay(){
+  const porCat={}; CATS.forEach(c=>porCat[c]={cantidad:0,monto:0});
+  return {cheques:{operaciones:0,cheques:0,monto:0},prestamos:{cantidad:0,monto:0,porCat}};
+}
+function render(mes){
+  const days = Object.keys(DATA).filter(d=>d.startsWith(mes)).sort();
+  const maxDay = days.length ? parseInt(days[days.length-1].slice(8),10) : 0;
+  const [y,m] = mes.split('-').map(Number);
+  const tot = emptyDay();
+  let rows='';
+  for(let dnum=1; dnum<=maxDay; dnum++){
+    const iso = mes+'-'+String(dnum).padStart(2,'0');
+    const d = DATA[iso] || emptyDay();
+    const ch=d.cheques, pr=d.prestamos, pc=pr.porCat;
+    const dow = new Date(Date.UTC(y,m-1,dnum)).getUTCDay();
+    const label = String(dnum).padStart(2,'0')+'/'+String(m).padStart(2,'0')+
+      ' <span class="muted">'+['dom','lun','mar','mié','jue','vie','sáb'][dow]+'</span>';
+    rows += '<tr><td class="dia">'+label+'</td>'+
+      '<td>'+cnt(ch.operaciones)+'</td><td>'+cnt(ch.cheques)+'</td><td>'+money(ch.monto)+'</td>'+
+      CATS.map(c=>'<td>'+cnt(pc[c].cantidad)+'</td><td>'+money(pc[c].monto)+'</td>').join('')+
+      '<td>'+cnt(pr.cantidad)+'</td><td>'+money(pr.monto)+'</td></tr>';
+    // acumular
+    tot.cheques.operaciones+=ch.operaciones; tot.cheques.cheques+=ch.cheques; tot.cheques.monto+=ch.monto;
+    tot.prestamos.cantidad+=pr.cantidad; tot.prestamos.monto+=pr.monto;
+    CATS.forEach(c=>{tot.prestamos.porCat[c].cantidad+=pc[c].cantidad; tot.prestamos.porCat[c].monto+=pc[c].monto;});
+  }
+  const tch=tot.cheques, tpr=tot.prestamos, tpc=tpr.porCat;
+  rows += '<tr class="total"><td class="dia">TOTAL</td>'+
+    '<td>'+cnt(tch.operaciones)+'</td><td>'+cnt(tch.cheques)+'</td><td>'+money(tch.monto)+'</td>'+
+    CATS.map(c=>'<td>'+cnt(tpc[c].cantidad)+'</td><td>'+money(tpc[c].monto)+'</td>').join('')+
+    '<td>'+cnt(tpr.cantidad)+'</td><td>'+money(tpr.monto)+'</td></tr>';
+  document.getElementById('tbody').innerHTML = rows;
+
+  document.getElementById('cards').innerHTML =
+    card('chq','Operaciones de cheques', cnt(tch.operaciones)) +
+    card('chq','Cheques descontados', cnt(tch.cheques)) +
+    card('chq','Monto descontado', money(tch.monto)) +
+    card('pres','Préstamos otorgados', cnt(tpr.cantidad)) +
+    card('pres','Monto prestado', money(tpr.monto));
+  document.getElementById('cobertura').textContent = days.length
+    ? '· '+days.length+' día(s) con actividad' : '· sin datos';
+}
+function card(cls,k,v){return '<div class="card '+cls+'"><div class="k">'+k+'</div><div class="v">'+v+'</div></div>';}
+
+const sel = document.getElementById('mes');
+sel.innerHTML = months().map(mk=>{
+  const [y,m]=mk.split('-'); return '<option value="'+mk+'">'+MESES[+m-1]+' '+y+'</option>';
+}).join('');
+sel.addEventListener('change', e=>render(e.target.value));
+if(months().length) render(months()[0]);
+</script>
+</body>
+</html>
