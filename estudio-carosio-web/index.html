@@ -159,10 +159,12 @@ header{
 header.compacto{border-bottom:3px double rgba(30,80,100,.4)}
 .nav{display:flex;align-items:center;gap:26px;height:var(--navh);transition:height .25s}
 header.compacto .nav{height:58px}
+.brand .mark{transition:width .25s,height .25s}
+header.compacto .brand .mark{width:48px;height:48px}
 .brand{display:flex;align-items:center;gap:12px;margin-right:auto}
-.brand .mark{flex:0 0 34px}
-.brand b{font-family:var(--font-display);font-weight:600;font-size:1.06rem;letter-spacing:.01em;white-space:nowrap}
-.brand small{display:block;font-family:var(--font-mono);font-size:.56rem;letter-spacing:.18em;text-transform:uppercase;color:var(--soft);font-weight:400;margin-top:2px}
+.brand .mark{flex:0 0 auto}
+.brand b{font-family:var(--font-display);font-weight:600;font-size:1.32rem;letter-spacing:.01em;white-space:nowrap}
+.brand small{display:block;font-family:var(--font-mono);font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--soft);font-weight:400;margin-top:2px}
 .nav-links{display:flex;gap:24px;font-size:.9rem;font-weight:500}
 .nav-links a{color:var(--soft);transition:color .18s;position:relative}
 .nav-links a:hover{color:var(--brand)}
@@ -187,11 +189,13 @@ header.compacto .nav{height:58px}
 
 /* ---------- hero: el libro abierto ---------- */
 .hero{
-  position:relative;min-height:calc(100vh - 72px);
-  padding:150px 0 72px;display:flex;align-items:center;
+  position:relative;min-height:0;
+  padding:156px 0 34px;display:flex;align-items:center;
   overflow:hidden;
 }
-.hero-grid{display:grid;grid-template-columns:1.12fr .88fr;gap:56px;align-items:center;width:100%}
+.hero-grid{display:grid;grid-template-columns:.92fr 1.08fr;gap:60px;align-items:center;width:100%}
+.hero-asiento{order:1}
+.hero-copy{order:2}
 .hero h1{
   font-size:clamp(2.6rem,5.4vw,4.4rem);color:var(--ink);
   line-height:1.05;
@@ -228,7 +232,7 @@ body.cargado .u-fund path{stroke-dashoffset:0}
 }
 .asiento-head{
   display:flex;justify-content:space-between;align-items:baseline;gap:12px;
-  border-bottom:3px double var(--brand);padding:2px 68px 12px 2px;margin:0 2px 4px;
+  border-bottom:3px double var(--brand);padding:2px 2px 12px 68px;margin:0 2px 4px;
   font-family:var(--font-mono);font-size:.68rem;letter-spacing:.18em;
   text-transform:uppercase;color:var(--brand);font-variant-numeric:tabular-nums;
 }
@@ -254,7 +258,8 @@ body.js-anim .arow .val .ch.on{opacity:1;transform:none}
 
 /* sello de matrícula (lacre) */
 .sello{
-  position:absolute;top:-46px;right:-34px;width:126px;height:126px;
+  position:absolute;top:-46px;left:-34px;right:auto;width:126px;height:126px;
+  animation-direction:reverse;
   animation:girar 40s linear infinite;transform-origin:50% 50%;
   filter:drop-shadow(0 4px 8px rgba(199,80,47,.18));
 }
@@ -568,11 +573,13 @@ body:not(.js-anim) .escena .sello-fin{transform:none;opacity:1}
   .hv-item:nth-child(even){padding-left:0;border-left:0}
   .hv-item{padding-right:0}
   #estudio .about-grid,.contact-grid{grid-template-columns:1fr;gap:44px}
-  .hero{min-height:0;padding:150px 0 76px}
-  .hero-grid{grid-template-columns:1fr;gap:48px}
+  .hero{min-height:0;padding:140px 0 76px}
+  .hero-grid{grid-template-columns:1fr;gap:44px}
+  .hero-copy{order:1}
+  .hero-asiento{order:2}
   .hero-frase{border-left:0;padding-left:0}
   .asiento-card{max-width:520px}
-  .sello{right:6px;top:-40px}
+  .sello{left:6px;right:auto;top:-40px}
 }
 @media (max-width:1239px) and (min-width:768px){
   .container{padding-left:64px}
@@ -613,7 +620,7 @@ body:not(.js-anim) .escena .sello-fin{transform:none;opacity:1}
   .cl-alta{height:46px}
   .wa-float{width:52px;height:52px;right:16px;bottom:16px}
   .asiento-card{padding:24px 20px 20px}
-  .sello{width:96px;height:96px;top:-30px;right:6px}
+  .sello{width:96px;height:96px;top:-30px;left:6px;right:auto}
   .arow .val{font-size:1.25rem}
   .quote-frame{padding:54px 18px}
   .hv-note .btn{width:100%;justify-content:center}
@@ -653,7 +660,7 @@ body:not(.js-anim) .escena .sello-fin{transform:none;opacity:1}
 <header>
   <div class="container nav">
     <a class="brand" href="#inicio" aria-label="Estudio Carosio — inicio">
-      <svg class="mark" width="34" height="34" viewBox="0 0 64 64" aria-hidden="true">
+      <svg class="mark" width="64" height="64" viewBox="0 0 64 64" aria-hidden="true">
         <rect x="13" y="13" width="38" height="38" rx="4" transform="rotate(45 32 32)" fill="#1e5064"/>
         <text x="32" y="38.5" font-family="Georgia,serif" font-size="17.5" fill="#fff" text-anchor="middle">EC</text>
       </svg>
@@ -724,9 +731,10 @@ body:not(.js-anim) .escena .sello-fin{transform:none;opacity:1}
             </g>
           </svg>
           <div class="asiento-head"><span>Asiento de apertura</span><span class="fol">Folio 001</span></div>
-          <div class="arow"><span class="lbl">Contadores p&#250;blicos</span><span class="dots"></span><span class="val" data-tw>4</span></div>
-          <div class="arow"><span class="lbl">Generaciones en la misma mesa</span><span class="dots"></span><span class="val" data-tw>2</span></div>
-          <div class="arow"><span class="lbl">Servicios de alto valor</span><span class="dots"></span><span class="val" data-tw>6</span></div>
+          <div class="arow"><span class="lbl">Profesionales</span><span class="dots"></span><span class="val" data-tw>5</span></div>
+          <div class="arow"><span class="lbl">Generaciones en la misma mesa</span><span class="dots"></span><span class="val" data-tw>3</span></div>
+          <div class="arow"><span class="lbl">Servicios contables</span><span class="dots"></span><span class="val" data-tw>4</span></div>
+          <div class="arow"><span class="lbl">Servicios estrat&#233;gicos</span><span class="dots"></span><span class="val" data-tw>6</span></div>
           <p class="asiento-nota">Registro conforme &#183; atenci&#243;n directa de los socios</p>
         </div>
       </div>
@@ -741,12 +749,12 @@ body:not(.js-anim) .escena .sello-fin{transform:none;opacity:1}
       <div class="section-head reveal">
         <span class="ghost" aria-hidden="true">01</span>
         <p class="eyebrow"><b>Asiento N.&#186; 01 / Folio 02</b> · El estudio</p>
-        <h2>Un estudio familiar, dos generaciones de contadores</h2>
+        <h2>Un estudio familiar, tres generaciones de contadores</h2>
       </div>
       <div class="about-grid">
         <div class="prose reveal">
           <p><strong>Nos encargamos de la contabilidad al 100&#8202;% para que nuestros clientes se encarguen de sus negocios.</strong> Llevamos un control preciso de finanzas e impuestos, reducimos el tiempo y el costo de la administraci&#243;n, y acercamos la informaci&#243;n a tiempo para las decisiones que importan.</p>
-          <p>Trabajamos con empresas y negocios de todos los tama&#241;os: del monotributista que reci&#233;n arranca a la sociedad con operaciones complejas. Y conocemos de cerca la din&#225;mica de las empresas familiares — la distinci&#243;n entre empresa, familia y propiedad — porque el Estudio tambi&#233;n es una: dos generaciones de contadores p&#250;blicos en la misma mesa de trabajo.</p>
+          <p>Trabajamos con empresas y negocios de todos los tama&#241;os: del monotributista que reci&#233;n arranca a la sociedad con operaciones complejas. Y conocemos de cerca la din&#225;mica de las empresas familiares — la distinci&#243;n entre empresa, familia y propiedad — porque el Estudio tambi&#233;n es una: tres generaciones de contadores en la misma mesa de trabajo.</p>
           <p>Y trabajamos a la vanguardia: el Estudio est&#225; <strong>potenciado con inteligencia artificial</strong> &#8212; el equipo trabaja con asistentes de IA y los procesos repetitivos se automatizan. Nuestra misi&#243;n es ser un socio confiable y transparente que contribuye al crecimiento y al &#233;xito de cada cliente.</p>
         </div>
         <aside class="fig-mesa reveal">
@@ -767,7 +775,7 @@ body:not(.js-anim) .escena .sello-fin{transform:none;opacity:1}
               <rect class="acento-fill" x="224" y="148" width="12" height="12" transform="rotate(45 230 154)"/>
             </svg>
           </div>
-          <p class="fig-caption">Fig. 01 — Dos generaciones, la misma mesa.</p>
+          <p class="fig-caption">Fig. 01 — Tres generaciones, la misma mesa.</p>
         </aside>
       </div>
     </div>
@@ -1070,7 +1078,7 @@ body:not(.js-anim) .escena .sello-fin{transform:none;opacity:1}
         <span class="ghost" aria-hidden="true">05</span>
         <p class="eyebrow"><b>Asiento N.&#186; 05 / Folio 29</b> · Equipo</p>
         <h2>Registro de matr&#237;culas</h2>
-        <p>Cuatro contadores p&#250;blicos y una analista, dos generaciones. Cada cliente trabaja directo con un profesional matriculado.</p>
+        <p>Cuatro contadores p&#250;blicos y una analista, tres generaciones. Cada cliente trabaja directo con un profesional matriculado.</p>
       </div>
       <div class="reveal">
         <table class="registro">
